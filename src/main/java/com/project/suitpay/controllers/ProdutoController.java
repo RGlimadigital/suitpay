@@ -34,7 +34,6 @@ public class ProdutoController {
     }
 
     @GetMapping("/produtos-ordenados")
-    @Transactional(rollbackOn = Exception.class)
     public ResponseEntity<List<Produto>> listaOrdenadaPorQuantidade(
             @RequestParam(defaultValue = "asc") String ordem,
             @RequestParam(defaultValue = "quantidade") String campo) {
@@ -44,6 +43,17 @@ public class ProdutoController {
     @GetMapping("/produtos/{id}")
     public ResponseEntity<ProdutoResponse> produtoPorId(@PathVariable("id") Long id) {
         return ResponseEntity.ok(service.produtoPorId(id));
+    }
+
+    @GetMapping("/produtos-filtrados")
+    public ResponseEntity<List<ProdutoResponse>> filtrandoProdutos(
+            @RequestParam(required = false) String nome,
+            @RequestParam(required = false) Double precoMin,
+            @RequestParam(required = false) Double precoMax,
+            @RequestParam(required = false) String nomeCategoria,
+            @RequestParam(required = false) Long idCategoria) {
+        return ResponseEntity.ok(service.filtrandoProdutos(nome, precoMin, precoMax, nomeCategoria, idCategoria));
+
     }
 
     @PutMapping("/atualiza-produto/{id}")

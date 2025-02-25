@@ -6,7 +6,9 @@ import com.project.suitpay.entities.produtos.ProdutoRequest;
 import com.project.suitpay.entities.produtos.ProdutoResponse;
 import com.project.suitpay.repositories.CategoriaRepository;
 import com.project.suitpay.repositories.ProdutoRepository;
+import com.project.suitpay.specifications.ProdutoSpecification;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -50,6 +52,17 @@ public class ProdutoService {
         Categoria categoria = encontrarCategoria(form.categoraiId());
         atualizaParametros(produto, form, categoria);
         return repository.save(produto);
+    }
+
+    public List<ProdutoResponse> filtrandoProdutos(String nome, Double precoMin , Double precoMax, String nomeCategoria, Long idCategoria ){
+        Specification<Produto> spec = Specification.where(null);
+        if (nome!= null && !nome.isEmpty()) spec = spec.and(ProdutoSpecification.nomeLike(nome));
+        if(precoMin!= null) spec = spec.and(ProdutoSpecification.precoMaiorQue(precoMin));
+        if(precoMax!= null) spec = spec.and(ProdutoSpecification.precoMenorQue(precoMax));
+        if(nomeCategoria != null) spec =  spec.and(ProdutoSpecification.categoriaNomeLike(nomeCategoria));
+        if(idCategoria != null) spec = spec.and(ProdutoSpecification.categoriaId(idCategoria));
+        return repository.findAll(spec).stream().map(ProdutoResponse::new).toList();
+
     }
 
     public void deleteProduto(Long id) {
