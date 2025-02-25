@@ -16,8 +16,8 @@ public record ProdutoRequest(
 
 ) {
 
-    public Produto toModel(EntityManager manager){
-        Categoria categoria = manager.find(Categoria.class, categoraiId);
+    public Produto toModel(Categoria categoria){
+
         return new Produto(nome, preco, descricao, quantidade, categoria);
     }
 }

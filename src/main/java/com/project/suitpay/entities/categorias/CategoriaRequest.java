@@ -7,7 +7,7 @@ public record CategoriaRequest(
         String nome
 ) {
 
-        public Categoria toModel(){
-            return new Categoria(nome);
-        }
+    public Categoria toModel() {
+        return new Categoria(nome);
+    }
 }

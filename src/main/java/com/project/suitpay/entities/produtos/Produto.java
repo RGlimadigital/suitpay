@@ -9,14 +9,13 @@ import java.util.Objects;
 @Entity
 public class Produto {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
     private String nome;
     private Double preco;
     private String descricao;
     private Integer quantidade;
     @ManyToOne
-    @JoinColumn(name = "categoria_id", nullable = false)
     private Categoria categoria;
 
     public Produto() {
