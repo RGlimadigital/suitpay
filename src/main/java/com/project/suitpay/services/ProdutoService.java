@@ -33,18 +33,6 @@ public class ProdutoService {
         return new ProdutoDTO(produto);
     }
 
-    public Page<ProdutoDTO> listadoProdutos(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return repository.findAll(pageable)
-                .map(ProdutoDTO::new);
-    }
-
-    public Page<ProdutoDTO> listaOrdenada(String ordem, String campo, int page, int size) {
-        Sort.Direction direction = Sort.Direction.fromString(ordem);
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, campo));
-        return repository.findAll(pageable).map(ProdutoDTO::new);
-    }
-
     public ProdutoDTO produtoPorId(Long id) {
         Produto produto = encontrandoProduto(id);
         return new ProdutoDTO(produto);
@@ -57,23 +45,18 @@ public class ProdutoService {
         return repository.save(produto);
     }
 
-    public Page<ProdutoDTO> filtrandoProdutos(String nome, String descricao,
-                                              Double precoMin, Double precoMax, String nomeCategoria, Long idCategoria,
-                                              int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
 
-        Specification<Produto> spec = Specification.where(null);
+    public Page<ProdutoDTO> listarProdutos(String nome, String descricao, Double precoMin,
+                                           Double precoMax, String nomeCategoria, Long idCategoria,
+                                           int page, int size, String sort, String direction) {
 
-        if (descricao != null && !descricao.isEmpty()) spec = spec.and(ProdutoSpecification.descricaoLike(descricao));
-        if (nomeCategoria != null) spec = spec.and(ProdutoSpecification.categoriaNomeLike(nomeCategoria));
-        if (nome != null && !nome.isEmpty()) spec = spec.and(ProdutoSpecification.nomeLike(nome));
-        if (idCategoria != null) spec = spec.and(ProdutoSpecification.categoriaId(idCategoria));
-        if (precoMin != null) spec = spec.and(ProdutoSpecification.precoMaiorQue(precoMin));
-        if (precoMax != null) spec = spec.and(ProdutoSpecification.precoMenorQue(precoMax));
+        Sort.Direction sortDirection = Sort.Direction.fromString(direction);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sort));
 
+        final Specification<Produto> spec = controleFiltros(nome, descricao, precoMin, precoMax, nomeCategoria, idCategoria);
         return repository.findAll(spec, pageable).map(ProdutoDTO::new);
-
     }
+
 
     public void deleteProduto(Long id) {
         Produto produto = encontrandoProduto(id);
@@ -91,6 +74,24 @@ public class ProdutoService {
         produto.setDescricao(form.descricao());
         produto.setQuantidade(form.quantidade());
         produto.setCategoria(categoria);
+    }
+
+    private static Specification<Produto> controleFiltros(String nome, String descricao,
+                                                          Double precoMin, Double precoMax,
+                                                          String nomeCategoria, Long idCategoria) {
+
+        return Specification
+                .where(isNotEmpty(nome) ? ProdutoSpecification.nomeLike(nome) : null)
+                .and(isNotEmpty(nomeCategoria) ? ProdutoSpecification.categoriaNomeLike(nomeCategoria) : null)
+                .and(isNotEmpty(descricao) ? ProdutoSpecification.descricaoLike(descricao) : null)
+                .and(idCategoria != null ? ProdutoSpecification.categoriaId(idCategoria) : null)
+                .and(precoMax != null ? ProdutoSpecification.precoMenorQue(precoMax) : null)
+                .and(precoMin != null ? ProdutoSpecification.precoMaiorQue(precoMin): null);
+
+    }
+
+    private static boolean isNotEmpty(String str){
+        return str !=null && !str.isEmpty();
     }
 
     private Produto encontrandoProduto(Long id) {
