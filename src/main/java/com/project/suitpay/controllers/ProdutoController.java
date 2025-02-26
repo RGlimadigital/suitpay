@@ -1,11 +1,11 @@
 package com.project.suitpay.controllers;
 
-import com.project.suitpay.entities.produtos.Produto;
 import com.project.suitpay.entities.produtos.ProdutoRequest;
 import com.project.suitpay.entities.produtos.ProdutoResponse;
 import com.project.suitpay.services.ProdutoService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -29,15 +29,22 @@ public class ProdutoController {
     }
 
     @GetMapping("/listando-produtos")
-    public ResponseEntity<List<ProdutoResponse>> listandoProdutos() {
-        return ResponseEntity.ok(service.listadoProdutos());
+    public ResponseEntity<Page<ProdutoResponse>> listandoProdutos(@RequestParam(defaultValue = "0") int page,
+                                                                  @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(service.listadoProdutos(page, size));
     }
 
     @GetMapping("/produtos-ordenados")
-    public ResponseEntity<List<Produto>> listaOrdenadaPorQuantidade(
+    public ResponseEntity<Page<ProdutoResponse>> listaOrdenadaPorQuantidade(
             @RequestParam(defaultValue = "asc") String ordem,
-            @RequestParam(defaultValue = "quantidade") String campo) {
-        return ResponseEntity.ok(service.listaOrdenada(ordem, campo));
+            @RequestParam(defaultValue = "quantidade") String campo,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+
+
+        Page<ProdutoResponse> produtos = service.listaOrdenada(ordem, campo, page, size);
+        return ResponseEntity.ok(produtos);
     }
 
     @GetMapping("/produtos/{id}")
@@ -48,11 +55,12 @@ public class ProdutoController {
     @GetMapping("/produtos-filtrados")
     public ResponseEntity<List<ProdutoResponse>> filtrandoProdutos(
             @RequestParam(required = false) String nome,
+            @RequestParam(required = false) String descricao,
             @RequestParam(required = false) Double precoMin,
             @RequestParam(required = false) Double precoMax,
             @RequestParam(required = false) String nomeCategoria,
             @RequestParam(required = false) Long idCategoria) {
-        return ResponseEntity.ok(service.filtrandoProdutos(nome, precoMin, precoMax, nomeCategoria, idCategoria));
+        return ResponseEntity.ok(service.filtrandoProdutos(nome,descricao, precoMin, precoMax, nomeCategoria, idCategoria));
 
     }
 

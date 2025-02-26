@@ -1,6 +1,5 @@
 package com.project.suitpay.controllers;
 
-import com.project.suitpay.entities.categorias.Categoria;
 import com.project.suitpay.entities.categorias.CategoriaRequest;
 import com.project.suitpay.entities.categorias.CategoriaResponse;
 import com.project.suitpay.services.CategoriaService;

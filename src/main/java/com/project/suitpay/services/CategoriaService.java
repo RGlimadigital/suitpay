@@ -47,7 +47,7 @@ public class CategoriaService {
     public void eliminaCategoria(Long id) {
         Categoria categoria = categoriasPorId(id);
         categoriaAssociadas(categoria);
-        repository.deleteById(id);
+        repository.delete(categoria);
     }
 
     private void categoriaAssociadas(Categoria categoria) {
