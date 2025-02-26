@@ -2,8 +2,8 @@ package com.project.suitpay.services;
 
 import com.project.suitpay.entities.categorias.Categoria;
 import com.project.suitpay.entities.produtos.Produto;
+import com.project.suitpay.entities.produtos.ProdutoDTO;
 import com.project.suitpay.entities.produtos.ProdutoRequest;
-import com.project.suitpay.entities.produtos.ProdutoResponse;
 import com.project.suitpay.repositories.CategoriaRepository;
 import com.project.suitpay.repositories.ProdutoRepository;
 import com.project.suitpay.specifications.ProdutoSpecification;
@@ -16,8 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-
 @Service
 public class ProdutoService {
 
@@ -29,27 +27,27 @@ public class ProdutoService {
         this.categoriaRepository = categoriaRepository;
     }
 
-    public ProdutoResponse criarProduto(ProdutoRequest produtoRequest) {
+    public ProdutoDTO criarProduto(ProdutoRequest produtoRequest) {
         Categoria categoria = encontrarCategoria(produtoRequest.categoraiId());
         Produto produto = repository.save(produtoRequest.toModel(categoria));
-        return new ProdutoResponse(produto);
+        return new ProdutoDTO(produto);
     }
 
-    public Page<ProdutoResponse> listadoProdutos(int page, int size) {
+    public Page<ProdutoDTO> listadoProdutos(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return repository.findAll(pageable)
-                .map(ProdutoResponse::new);
+                .map(ProdutoDTO::new);
     }
 
-    public Page<ProdutoResponse> listaOrdenada(String ordem, String campo, int page, int size) {
+    public Page<ProdutoDTO> listaOrdenada(String ordem, String campo, int page, int size) {
         Sort.Direction direction = Sort.Direction.fromString(ordem);
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, campo));
-        return repository.findAll(pageable).map(ProdutoResponse::new);
+        return repository.findAll(pageable).map(ProdutoDTO::new);
     }
 
-    public ProdutoResponse produtoPorId(Long id) {
+    public ProdutoDTO produtoPorId(Long id) {
         Produto produto = encontrandoProduto(id);
-        return new ProdutoResponse(produto);
+        return new ProdutoDTO(produto);
     }
 
     public Produto atualizaProduto(ProdutoRequest form, Long id) {
@@ -59,8 +57,10 @@ public class ProdutoService {
         return repository.save(produto);
     }
 
-    public List<ProdutoResponse> filtrandoProdutos(String nome, String descricao,
-                                                   Double precoMin, Double precoMax, String nomeCategoria, Long idCategoria) {
+    public Page<ProdutoDTO> filtrandoProdutos(String nome, String descricao,
+                                              Double precoMin, Double precoMax, String nomeCategoria, Long idCategoria,
+                                              int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
 
         Specification<Produto> spec = Specification.where(null);
 
@@ -71,7 +71,7 @@ public class ProdutoService {
         if (precoMin != null) spec = spec.and(ProdutoSpecification.precoMaiorQue(precoMin));
         if (precoMax != null) spec = spec.and(ProdutoSpecification.precoMenorQue(precoMax));
 
-        return repository.findAll(spec).stream().map(ProdutoResponse::new).toList();
+        return repository.findAll(spec, pageable).map(ProdutoDTO::new);
 
     }
 
