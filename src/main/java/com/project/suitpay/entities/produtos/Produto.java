@@ -2,7 +2,6 @@ package com.project.suitpay.entities.produtos;
 
 import com.project.suitpay.entities.categorias.Categoria;
 import jakarta.persistence.*;
-import org.antlr.v4.runtime.misc.NotNull;
 
 import java.util.Objects;
 

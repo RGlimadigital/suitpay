@@ -2,9 +2,8 @@ package com.project.suitpay.entities.produtos;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.hateoas.RepresentationModel;
 
-public class ProdutoDTO extends RepresentationModel<ProdutoDTO> {
+public class ProdutoDTO  {
     @NotBlank
     private final Long id;
     private final String nome;

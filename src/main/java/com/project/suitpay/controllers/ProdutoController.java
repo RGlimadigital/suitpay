@@ -8,12 +8,14 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/produtos")
@@ -31,7 +33,7 @@ public class ProdutoController {
     @PostMapping
     @Transactional
     public ResponseEntity<EntityModel<ProdutoDTO>> novoProduto(@RequestBody @Valid ProdutoRequest form) {
-        return ResponseEntity.ok(assembler.toModel(service.criarProduto(form)));
+        return ResponseEntity.status(HttpStatus.CREATED).body(assembler.toModel(service.criarProduto(form)));
     }
 
     @GetMapping
@@ -58,6 +60,12 @@ public class ProdutoController {
     public ResponseEntity<EntityModel<ProdutoDTO>> produtoPorId(@PathVariable("id") Long id) {
         ProdutoDTO produto = service.produtoPorId(id);
         return ResponseEntity.ok(assembler.toModel(produto));
+    }
+
+    @GetMapping("/categoria/{id}")
+    public ResponseEntity<List<EntityModel<ProdutoDTO>>> produtoPorCategoriaId(@PathVariable("id") Long categoriaId, PagedResourcesAssembler<ProdutoDTO> pagedAssembler) {
+        List<EntityModel<ProdutoDTO>> produtos = service.obterProdutosPorCategoria(categoriaId).stream().map(assembler::toModel).toList();
+        return ResponseEntity.ok(produtos);
     }
 
 

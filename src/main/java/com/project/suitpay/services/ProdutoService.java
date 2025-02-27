@@ -16,6 +16,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+
 @Service
 public class ProdutoService {
 
@@ -61,6 +63,11 @@ public class ProdutoService {
     public void deleteProduto(Long id) {
         Produto produto = encontrandoProduto(id);
         repository.delete(produto);
+    }
+
+    public List<ProdutoDTO> obterProdutosPorCategoria(Long categoriaId){
+        Categoria categoria = encontrarCategoria(categoriaId);
+        return repository.findByCategoria(categoria).stream().map(ProdutoDTO::new).toList();
     }
 
     private Categoria encontrarCategoria(Long id) {
