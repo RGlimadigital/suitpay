@@ -5,13 +5,16 @@ import jakarta.validation.constraints.NotNull;
 
 public class ProdutoDTO  {
     @NotBlank
-    private final Long id;
-    private final String nome;
-    private final Double preco;
-    private final String descricao;
-    private final Integer quantidade;
+    private  Long id;
+    private  String nome;
+    private  Double preco;
+    private  String descricao;
+    private  Integer quantidade;
     @NotNull
-    private final String categoriaId;
+    private  String categoriaId;
+
+    public ProdutoDTO() {
+    }
 
     public ProdutoDTO(Produto produto) {
         this.id = produto.getId();
@@ -45,5 +48,29 @@ public class ProdutoDTO  {
 
     public String getCategoriaId() {
         return categoriaId;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public void setPreco(Double preco) {
+        this.preco = preco;
+    }
+
+    public void setDescricao(String descricao) {
+        this.descricao = descricao;
+    }
+
+    public void setQuantidade(Integer quantidade) {
+        this.quantidade = quantidade;
+    }
+
+    public void setCategoriaId(String categoriaId) {
+        this.categoriaId = categoriaId;
     }
 }
