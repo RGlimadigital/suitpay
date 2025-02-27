@@ -1,8 +1,7 @@
 package com.project.suitpay.entities.produtos;
+
 import com.project.suitpay.controllers.ProdutoController;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.stereotype.Component;
 
@@ -19,10 +18,5 @@ public class ProdutoModelAssembler implements RepresentationModelAssembler<Produ
                 linkTo(methodOn(ProdutoController.class).atualizarProduto(null, produto.getId())).withRel("update"),
                 linkTo(methodOn(ProdutoController.class).deletarProduto(produto.getId())).withRel("delete")
         );
-    }
-
-    @Override
-    public CollectionModel toCollectionModel(Iterable entities) {
-        return RepresentationModelAssembler.super.toCollectionModel(entities);
     }
 }

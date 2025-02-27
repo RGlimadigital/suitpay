@@ -4,6 +4,8 @@ import com.project.suitpay.entities.categorias.Categoria;
 import com.project.suitpay.entities.produtos.Produto;
 import com.project.suitpay.entities.produtos.ProdutoDTO;
 import com.project.suitpay.entities.produtos.ProdutoRequest;
+import com.project.suitpay.exceptions.CategoriaNaoEncontradaException;
+import com.project.suitpay.exceptions.ProdutoNaoEncontradoException;
 import com.project.suitpay.repositories.CategoriaRepository;
 import com.project.suitpay.repositories.ProdutoRepository;
 import com.project.suitpay.specifications.ProdutoSpecification;
@@ -72,7 +74,7 @@ public class ProdutoService {
 
     private Categoria encontrarCategoria(Long id) {
         return categoriaRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoria não encontrada"));
+                .orElseThrow(() -> new ProdutoNaoEncontradoException(id));
     }
 
     private void atualizaParametros(Produto produto, ProdutoRequest form, Categoria categoria) {
@@ -103,6 +105,6 @@ public class ProdutoService {
 
     private Produto encontrandoProduto(Long id) {
         return repository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado"));
+                .orElseThrow(() -> new CategoriaNaoEncontradaException(id));
     }
 }

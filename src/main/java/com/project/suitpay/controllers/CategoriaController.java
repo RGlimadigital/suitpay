@@ -1,49 +1,64 @@
 package com.project.suitpay.controllers;
 
+import com.project.suitpay.entities.categorias.CategoriaDTO;
+import com.project.suitpay.entities.categorias.CategoriaModelAssembler;
 import com.project.suitpay.entities.categorias.CategoriaRequest;
-import com.project.suitpay.entities.categorias.CategoriaResponse;
 import com.project.suitpay.services.CategoriaService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
+@RequestMapping("/categorias")
 @Validated
 public class CategoriaController {
 
     private final CategoriaService service;
+    private final CategoriaModelAssembler assembler;
 
-    public CategoriaController(CategoriaService service) {
+    public CategoriaController(CategoriaService service, CategoriaModelAssembler assembler) {
         this.service = service;
+        this.assembler = assembler;
     }
 
-    @PostMapping("/categorias")
+    @PostMapping
     @Transactional
-    public ResponseEntity<CategoriaResponse> criaCategoria(@RequestBody @Valid CategoriaRequest form) {
-        return ResponseEntity.ok(service.criandoCategoria(form));
+    public ResponseEntity<EntityModel<CategoriaDTO>> criaCategoria(@RequestBody @Valid CategoriaRequest form) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(assembler.toModel(service.criandoCategoria(form)));
     }
 
-    @GetMapping("/listando-categorias")
-    public ResponseEntity<List<CategoriaResponse>> listarCategorias() {
-        return ResponseEntity.ok(service.listandoCategorias());
+    @GetMapping
+    public ResponseEntity<PagedModel<EntityModel<CategoriaDTO>>> listarCategorias(
+            @RequestParam(required = false) String nome,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            PagedResourcesAssembler<CategoriaDTO> pagedAssembler
+    ) {
+        Page<CategoriaDTO> categoriasPage = service.listandoCategorias(nome, page, size);
+        PagedModel<EntityModel<CategoriaDTO>> categoias = pagedAssembler.toModel(categoriasPage, assembler);
+        return ResponseEntity.ok(categoias);
     }
 
-    @GetMapping("/categoria/{id}")
-    public ResponseEntity<CategoriaResponse> categoriaPorId(@PathVariable("id") Long id) {
-        CategoriaResponse categoriaResponse = new CategoriaResponse(service.categoriasPorId(id));
-        return ResponseEntity.ok(categoriaResponse);
+    @GetMapping("/{id}")
+    public ResponseEntity<EntityModel<CategoriaDTO>> categoriaPorId(@PathVariable("id") Long id) {
+        CategoriaDTO categoria = service.categoriaEspecifica(id);
+        return ResponseEntity.ok(assembler.toModel(categoria));
     }
 
-    @PutMapping("/atualiza-categoria/{id}")
-    public ResponseEntity<CategoriaResponse> atualizarCategoria(@RequestBody @Valid CategoriaRequest form, @PathVariable("id") Long id) {
-        return ResponseEntity.ok(service.atualizarCategoria(form, id));
+    @PutMapping("/{id}")
+    public ResponseEntity<EntityModel<CategoriaDTO>> atualizarCategoria(@RequestBody @Valid CategoriaRequest form, @PathVariable("id") Long id) {
+        CategoriaDTO categoria = service.atualizarCategoria(form, id);
+        return ResponseEntity.ok(assembler.toModel(categoria));
     }
 
-    @DeleteMapping("/elimina-categoria/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletaCategoria(@PathVariable("id") Long id) {
         service.eliminaCategoria(id);
         return ResponseEntity.noContent().build();

@@ -1,15 +1,18 @@
 package com.project.suitpay.services;
 
 import com.project.suitpay.entities.categorias.Categoria;
+import com.project.suitpay.entities.categorias.CategoriaDTO;
 import com.project.suitpay.entities.categorias.CategoriaRequest;
-import com.project.suitpay.entities.categorias.CategoriaResponse;
+import com.project.suitpay.exceptions.CategoriaComProdutosException;
+import com.project.suitpay.exceptions.CategoriaNaoEncontradaException;
 import com.project.suitpay.repositories.CategoriaRepository;
 import com.project.suitpay.repositories.ProdutoRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.util.List;
 
 @Service
 public class CategoriaService {
@@ -23,25 +26,35 @@ public class CategoriaService {
     }
 
 
-    public CategoriaResponse criandoCategoria(CategoriaRequest cat) {
+    public CategoriaDTO criandoCategoria(CategoriaRequest cat) {
         Categoria categoria = repository.save(cat.toModel());
-        return new CategoriaResponse(categoria);
+        return new CategoriaDTO(categoria);
     }
 
-    public List<CategoriaResponse> listandoCategorias() {
-        return repository.findAll().stream().map(CategoriaResponse::new).toList();
+    public Page<CategoriaDTO> listandoCategorias(String nome, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Categoria> categorias = (nome == null || nome.isEmpty())
+                ? repository.findAll(pageable)
+                : repository.findByNomeContainingIgnoreCase(nome, pageable);
+
+        return categorias.map(CategoriaDTO::new);
+    }
+
+
+    public CategoriaDTO categoriaEspecifica(Long id) {
+        return new CategoriaDTO(categoriasPorId(id));
     }
 
     public Categoria categoriasPorId(Long id) {
         return repository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoria não encontrada"));
+                .orElseThrow(() -> new CategoriaNaoEncontradaException(id));
     }
 
-    public CategoriaResponse atualizarCategoria(CategoriaRequest form, Long id) {
+    public CategoriaDTO atualizarCategoria(CategoriaRequest form, Long id) {
         Categoria categoria = categoriasPorId(id);
         categoria.setNome(form.nome());
-        repository.save(categoria);
-        return new CategoriaResponse(categoria);
+        return new CategoriaDTO(repository.save(categoria));
     }
 
     public void eliminaCategoria(Long id) {
@@ -53,8 +66,7 @@ public class CategoriaService {
     private void categoriaAssociadas(Categoria categoria) {
         boolean possuiProdutos = produtoRepository.existsByCategoria(categoria);
         if (possuiProdutos) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    "Não é possível excluir a categoria, pois existem produtos associados");
+            throw new CategoriaComProdutosException();
         }
     }
 }
