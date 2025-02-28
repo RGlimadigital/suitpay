@@ -105,6 +105,6 @@ public class ProdutoService {
 
     private Produto encontrandoProduto(Long id) {
         return repository.findById(id)
-                .orElseThrow(() -> new CategoriaNaoEncontradaException(id));
+                .orElseThrow(() -> new ProdutoNaoEncontradoException(id));
     }
 }
